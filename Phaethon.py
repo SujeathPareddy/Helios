@@ -1,7 +1,7 @@
 class Faction:  
 		def __init__(self,capital,cities):
-                                self.capital = capital
-                                self.cities = [capital]+cities
+                self.capital = capital
+                self.cities = [capital]+cities
 				
 		def getManPower(self):
 				return sum(map(lambda city:city.manPower,self.cities))
@@ -18,7 +18,7 @@ class Faction:
 		def destroy(self):
 				pass
 		
-                def changeCapital(capital):
+        def changeCapital(capital):
 				self.capital = capital
 
 class City:
@@ -32,35 +32,39 @@ class City:
 				self.destroyed=False
 				self.beseiged=False
 
-                 def besiege(self):
-                                self.besieged=True
+        def besiege(self):
+                self.besieged=True
 				self.money*=0.33
 				self.manPower*=0.33
 				self.supply*=0.33
 		
+		def seigeIter(self):
+				pass
+				
 		def desiege(self):
 				self.besieged=False
 				pass
 
-                def destroy(self):
-                                self.destroyed=True
-                                self.money=0
-                                self.manPower=0
+        def destroy(self):
+                self.destroyed=True
+                self.money=0
+                self.manPower=0
         
-                def sack(self):
-                                pass            
+        def sack(self):
+                pass            
 
 class superFaction(Faction):
-                 def __init__(self,allies,enemies):
+        def __init__(self,allies,enemies):
 				self.allies=[]
 				self.enemies=[]
 				self.armies=[]
 				self.navies=[]
 
 class Province:
-                def __init__(self):
-                		pass 
+        def __init__(self):
+           		pass 
                 
+
                         
                         
 
