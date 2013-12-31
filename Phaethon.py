@@ -22,9 +22,9 @@ class Faction:
 				self.capital = capital
 
 class City:
-		 def __init__(self,province,alleigance,geoX,geoY):
-				self.manPower=0
-				self.money=0            
+		 def __init__(self,province,alleigance,geoX,geoY,manPower=0,money=0):
+				self.manPower=manPower
+				self.money=money            
 				self.province=province
 				self.geoX=geoX
 				self.geoY=geoY
