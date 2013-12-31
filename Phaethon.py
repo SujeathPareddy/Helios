@@ -72,12 +72,6 @@ class superFaction(Faction):
 class Province:
 		def __init__(self):
             	pass 
-                
-                        
-                        
-
-                
-
 				
 class Route:
 		def __init__(self,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
