@@ -8,8 +8,6 @@ Romans.addEnemy(Hannibal)
 Romans.addEnemy(Carthaginians)
 Hannibal.addEnemy(Carthaginians)
 
-superFactions=[Romans,Hannibal,Carthaginians]
-
 RomesProvince=Province(Romans)
 CarthagesProvince=Province(Carthaginians)
 Athena=Province(Romans)
