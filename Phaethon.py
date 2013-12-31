@@ -17,6 +17,9 @@ class Faction:
 				
 		def destroy(self):
 				pass
+		
+        def changeCapital(capital):
+				self.capital = capital
 
 class City:
 		 def __init__(self,province,alleigance,geoX,geoY):
@@ -48,22 +51,15 @@ class City:
         		pass            
 
 class superFaction(Faction):
-
-                armies = []
-                navies = []
-              
-
-                def __init__(self,allies,enemies):
-                        self.allies =[]
-                        self.enemies = []
-
-                def changeCapital(capital):
-                        self.capital = capital
-
+         def __init__(self,allies,enemies):
+				self.allies=[]
+				self.enemies=[]
+				self.armies=[]
+				self.navies=[]
 
 class Province:
-
-            def 
+            def __init__(self):
+            		pass 
                 
                         
                         
