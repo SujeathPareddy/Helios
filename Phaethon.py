@@ -72,7 +72,7 @@ class City:
 		def sack(self):
 				pass
 
-class superFaction(Faction):
+class SuperFaction(Faction):
 		def __init__(self,name,allies=[],enemies=[],neutral=[],capital=None):
 				self.neutral=neutral
 				self.allies=allies
