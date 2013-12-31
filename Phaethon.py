@@ -65,7 +65,7 @@ class GraphAnalyser:
 			
 			def unblockedFrom(recrutingSuperFaction,recruitingRegion):
 					G=nx.MultiGraph()
-					G.add_edges_from([(route.A,route.B) for route in self.routes if not route.isBlockedFor(recruitingSuperFraction)])
+					G.add_edges_from([(route.A,route.B) for route in self.routes if not route.isBlockedFor(recruitingSuperFaction)])
 					return any(G.has_path(recruitingSuperFaction.capital,region) for region in recruitingRegion.cities)
 					
 			
