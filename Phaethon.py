@@ -2,7 +2,7 @@ import networkx as nx
 
 superFactions=[]
 routes=[]
-seaRoutes=[]
+seaRoutes=[]#Variables
 
 def triggerNavalBattle(navies):
 		pass
