@@ -1,35 +1,38 @@
 from Phaethon import *
 
-Romans=superFaction("Romans")
-Hannibal=superFaction("Hannibal")
-Carthaginians=superFaction("Carthaginians")
+Romans=SuperFaction("Romans")
+Hannibal=SuperFaction("Hannibal")
+Carthaginians=SuperFaction("Carthaginians")
 
 Romans.addEnemy(Hannibal)
 Romans.addEnemy(Carthaginians)
 Hannibal.addEnemy(Carthaginians)
 
-RomesProvince=Province(Romans)
-CarthagesProvince=Province(Carthaginians)
-Athena=Province(Romans)
+Greeks=Faction("Greeks",Romans)
 
-Rome=City("Rome",RomesProvince,Romans,0,0)
-Carthage=City("Carthage",CarthagesProvince,Carthaginians,0,0)
-Athens=City("Athens",Athena,Romans,0,0)
+RomesProvince=Province("RomansProvince",Romans)
+CarthagesProvince=Province("CarthaginiansProvince",Carthaginians)
+AthenasProvince=Province("AthenasProvince",Greeks)
 
-Romans.changeCapital(Rome)
-Carthaginians.changeCapital(Carthage)
+Rome=City("Rome",RomesProvince,Romans)
+Carthage=City("Carthage",CarthagesProvince,Carthaginians)
+Athens=City("Athens",AthenasProvince,Greeks)
+
+Romans.capital=Rome
+Carthaginians.capital=Carthage
+Greeks.capital=Athens
 
 RomeExpress=Route([],Rome,Carthage,[RomesProvince,CarthagesProvince])
-VictoryRoad=Route([],Rome,Athens,[RomesProvince,Athena])
+VictoryRoad=Route([],Rome,Athens,[RomesProvince,AthenasProvince])
 
-FishMax=SeaRoute([],Carthage,Athena)
+FishMax=SeaRoute([],Carthage,Athens)
 
 GA=GraphAnalyser()
 
 print(RomeExpress.passesThrough(RomesProvince))
 print(RomeExpress.passesThrough(CarthagesProvince))
-print(RomeExpress.passesThrough(Athena))
-print(VictoryRoad.passesThrough(Athena))
+print(RomeExpress.passesThrough(AthenasProvince))
+print(VictoryRoad.passesThrough(AthenasProvince))
 print(VictoryRoad.passesThrough(CarthagesProvince))
 print(FishMax.isBlockedFor(Romans))
 

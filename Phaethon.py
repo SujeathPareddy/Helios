@@ -14,10 +14,13 @@ def triggerArmyBattle(armies):
 		pass
 		
 class Faction:
-		def __init__(self,name,cities,capital=None):
-				self.capital=capital
-				self.cities=[capital]+cities
-				factions.append(self)
+		def __init__(self,name,alleigance):
+				self.name=name
+				self.capital=None
+				self.province=None
+				self.cities=[]
+				self.alleigance=alleigance
+				factions.append(self)#@global
 
 		def getManPower(self):
 				return sum(map(lambda city:city.manPower,self.cities))
@@ -40,49 +43,19 @@ class Faction:
 		def __str__(self):
 				return self.name
 
-class City:
-		def __init__(self,name,province,alleigance,geoX,geoY,manPower=0,money=0):
-				self.name=name
-				self.manPower=manPower
-				self.money=money
-				self.province=province
-				self.geoX=geoX
-				self.geoY=geoY
-				self.alleigance=alleigance
-				self.destroyed=False
-				self.beseiged=False
-				province.addCity(self)
-				cities.append(self)
-
-		def besiege(self):
-				self.besieged=True
-				self.money*=0.33
-				self.manPower*=0.33
-				self.supply*=0.33
-
-		def desiege(self):
-				self.besieged=False
-				pass
-
-		def destroy(self):
-				self.destroyed=True
-				self.money=0
-				self.manPower=0
-
-		def sack(self):
-				pass
-
 class SuperFaction(Faction):
-		def __init__(self,name,allies=[],enemies=[],neutral=[],capital=None):
-				self.neutral=neutral
-				self.allies=allies
-				self.enemies=enemies
-				self.alleigance=self
-				self.capital=capital
+		def __init__(self,name):
 				self.name=name
+				self.neutral=[]
+				self.allies=[]
+				self.enemies=[]
+				self.alleigance=self
+				self.capital=None
+				self.cities=[]
 				self.armies=[]
 				self.navies=[]
-				superFactions.append(self)
+				self.province=None
+				superFactions.append(self)#@global
 
 		def addEnemy(self,enemy):
 				if enemy in self.enemies:
@@ -115,15 +88,45 @@ class SuperFaction(Faction):
 				neutral.addNeutral(self)
 
 class Province:
-		def __init__(self,occupying,cities=[]):
+		def __init__(self,name,occupying):
+				self.name=name
 				self.occupying=occupying
-				self.cities=cities
-				
-		def addCity(self,city):
-				if city in self.cities:
-						return
-				else:
-						self.cities.append(city)
+				self.cities=[]
+				occupying.cities=self.cities
+				occupying.province=self#@upper
+				provinces.append(self)#@global
+
+class City:
+		def __init__(self,name,province,alleigance,geoX=0,geoY=0,manPower=0,money=0):
+				self.name=name
+				self.province=province
+				province.cities.append(self)#@upper
+				self.alleigance=alleigance#Use self.alleigance.alleigance to get superFaction
+				self.geoX=geoX
+				self.geoY=geoY
+				self.manPower=manPower
+				self.money=money
+				self.destroyed=False
+				self.beseiged=False
+				cities.append(self)#@global
+
+		def besiege(self):
+				self.besieged=True
+				self.money*=0.33
+				self.manPower*=0.33
+				self.supply*=0.33
+
+		def desiege(self):
+				self.besieged=False
+				pass
+
+		def destroy(self):
+				self.destroyed=True
+				self.money=0
+				self.manPower=0
+
+		def sack(self):
+				pass
 
 class Route:
 		def __init__(self,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
@@ -152,7 +155,7 @@ class SeaRoute:
 				seaRoutes.append(self)
 
 		def addNavy(navy):
-				if navy not in self.navies:
+				if navy not in self.navies[navy.faction]:
 						self.navies[navy.faction].append(navy)
 				navyPresence=0
 				for side in self.navies:
@@ -168,7 +171,7 @@ class SeaRoute:
 						if len(self.navies[side])>0:
 								return True
 				return False
-				
+
 class GraphAnalyser:
 		def __init__(self):
 				self.routes=routes+seaRoutes
