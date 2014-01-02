@@ -97,7 +97,7 @@ class Province:
 				provinces.append(self)#@global
 
 class City:
-		def __init__(self,name,province,alleigance,geoX=0,geoY=0,manPower=0,money=0):
+		def __init__(self,name,province,alleigance,geoX=0,geoY=0,manPower=0,money=0,capital=False):
 				self.name=name
 				self.province=province
 				province.cities.append(self)#@upper
@@ -108,6 +108,8 @@ class City:
 				self.money=money
 				self.destroyed=False
 				self.beseiged=False
+				if capital:
+						alleigance.capital=self
 				cities.append(self)#@global
 
 		def besiege(self):
@@ -180,3 +182,25 @@ class GraphAnalyser:
 				G=nx.MultiGraph()
 				G.add_edges_from([(route.A,route.B) for route in self.routes if not route.isBlockedFor(recruitingSuperFaction)])
 				return any(nx.has_path(G,recruitingSuperFaction.capital,region) for region in recruitingRegion.cities)
+				
+class MetaArmy:
+		def __init__(self,geoX,geoY,faction):	
+				self.geoX=geoX
+				self.geoY=geoY
+				self.faction=faction
+
+class Army(MetaArmy):
+		def __init__(self,geoX,geoY,faction):
+				self.geoX=geoX
+				self.geoY=geoY
+				self.faction=faction
+				faction.armies.append(self)#@upper
+				armies.append(self)#@global
+				
+class Navy(MetaArmy):
+		def __init__(self,geoC,geoY,faction):
+				self.geoX=geoX
+				self.geoY=geoY
+				navies.append(self)
+				faction.navies.append(self)#@upper
+				self.faction=faction#@global
