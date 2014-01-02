@@ -10,7 +10,7 @@ class Faction:
 				mp=getManPower()
 				fractions=map(lambda x:x.manPower/mp,self.cities)
 				for i in range(len(self.cities)):
-						self.cities[i].manPower-=fraction[i]*self.cities[i].manPower
+						self.cities[i].manPower-=fraction[i]*number
 
 		def getTribute(self):
 				pass
