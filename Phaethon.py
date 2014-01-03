@@ -6,6 +6,8 @@ routes=[]
 provinces=[]
 seaRoutes=[]
 cities=[]
+armies=[]
+navies=[]
 
 def triggerNavalBattle(navies):
 		pass
@@ -19,17 +21,16 @@ class Faction:
 				self.capital=None
 				self.province=None
 				self.cities=[]
+				self.neutral=[]
+				self.allies=[]
+				self.enemies=[]
 				self.alleigance=alleigance
 				factions.append(self)#@global
+				self.armies=[]
+				self.navies=[]
 
 		def getManPower(self):
 				return sum(map(lambda city:city.manPower,self.cities))
-
-		def recruit(self,number):
-				mp=self.getManPower()
-				fractions=map(lambda x:x.manPower/mp,self.cities)
-				for i in range(len(self.cities)):
-						self.cities[i].manPower-=fraction[i]*number
 
 		def getTribute(self):
 				pass
@@ -42,21 +43,7 @@ class Faction:
 				
 		def __str__(self):
 				return self.name
-
-class SuperFaction(Faction):
-		def __init__(self,name):
-				self.name=name
-				self.neutral=[]
-				self.allies=[]
-				self.enemies=[]
-				self.alleigance=self
-				self.capital=None
-				self.cities=[]
-				self.armies=[]
-				self.navies=[]
-				self.province=None
-				superFactions.append(self)#@global
-
+				
 		def addEnemy(self,enemy):
 				if enemy in self.enemies:
 						return
@@ -86,6 +73,36 @@ class SuperFaction(Faction):
 						self.allies.remove(neutral)
 				self.neutral.append(neutral)
 				neutral.addNeutral(self)
+				
+		def recruitFrom(self,recruiter,troops):#Troops is a dict, E.g. {"Iberian Foot Soldiers":100,"War Elephants":15,...}
+				if recruiter in self.enemies:
+						return False
+				number=sum(troops.values())
+				mp=self.getManPower()
+				fractions=list(map(lambda x:x.manPower/mp,self.cities))
+				for i in range(len(self.cities)):
+						self.cities[i].manPower-=fractions[i]*number
+						if self.cities[i].manPower<0:
+								return False
+				Army(self.capital.geoX,self.capital.geoY,recruiter,troops)
+				return True
+				
+		def recruitArmy(self,target,troops):
+				target.recruitFrom(self,troops)
+
+class SuperFaction(Faction):
+		def __init__(self,name):
+				self.name=name
+				self.neutral=[]
+				self.allies=[]
+				self.enemies=[]
+				self.alleigance=self
+				self.capital=None
+				self.cities=[]
+				self.armies=[]
+				self.navies=[]
+				self.province=None
+				superFactions.append(self)#@global
 
 class Province:
 		def __init__(self,name,occupying):
@@ -188,12 +205,19 @@ class MetaArmy:
 				self.geoX=geoX
 				self.geoY=geoY
 				self.faction=faction
+				
+		def checkValidMove(self,newX,newY):
+				return notnewX,newY
+				
+		def move(self,newX,newY):
+				pass
 
 class Army(MetaArmy):
-		def __init__(self,geoX,geoY,faction):
+		def __init__(self,geoX,geoY,faction,composition):
 				self.geoX=geoX
 				self.geoY=geoY
 				self.faction=faction
+				self.composition=composition
 				faction.armies.append(self)#@upper
 				armies.append(self)#@global
 				
