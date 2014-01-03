@@ -9,11 +9,35 @@ cities=[]
 armies=[]
 navies=[]
 
-def triggerNavalBattle(navies):
-		pass
+def isOnLand(newX,newY):
+		return True
 
-def triggerArmyBattle(armies):
-		pass
+def isOnWater(newX,newY):
+		return True
+
+def triggerBattle(List):
+		k=0
+		flag=False
+		for i in List:
+				print(k,end='=')
+				print(i.faction,end='')
+				print(i)
+				k+=1
+		while True:
+				winner=[int(i) for i in input("Enter the winner(s)").split()]#Add a try catch block here!!!
+				for i in winner:
+						if not 0<=i<=k:
+								print("Invalid")
+								flag=True
+								break
+				if flag:
+						continue
+				for i in range(k):
+						if i in winner:
+								continue
+						List[i].destroy()
+				break
+						
 		
 class Faction:
 		def __init__(self,name,alleigance):
@@ -74,7 +98,7 @@ class Faction:
 				self.neutral.append(neutral)
 				neutral.addNeutral(self)
 				
-		def recruitFrom(self,recruiter,troops):#Troops is a dict, E.g. {"Iberian Foot Soldiers":100,"War Elephants":15,...}
+		def recruitFrom(self,recruiter,troops,cue):#Troops is a dict, E.g. {"Iberian Foot Soldiers":100,"War Elephants":15,...}
 				if recruiter in self.enemies:
 						return False
 				number=sum(troops.values())
@@ -84,11 +108,17 @@ class Faction:
 						self.cities[i].manPower-=fractions[i]*number
 						if self.cities[i].manPower<0:
 								return False
-				Army(self.capital.geoX,self.capital.geoY,recruiter,troops)
+				if cue:
+						Army(self.capital.geoX,self.capital.geoY,recruiter,troops)
+				else:
+						Navy(self.capital.geoX,self.capital.geoY,recruiter,troops)
 				return True
 				
 		def recruitArmy(self,target,troops):
-				target.recruitFrom(self,troops)
+				target.recruitFrom(self,troops,True)
+		
+		def recruitNavy(self,target,troops):
+				target.recruitFrom(self,troops,False)
 
 class SuperFaction(Faction):
 		def __init__(self,name):
@@ -201,16 +231,20 @@ class GraphAnalyser:
 				return any(nx.has_path(G,recruitingSuperFaction.capital,region) for region in recruitingRegion.cities)
 				
 class MetaArmy:
-		def __init__(self,geoX,geoY,faction):	
+		def __init__(self,geoX,geoY,faction,composition):	
 				self.geoX=geoX
 				self.geoY=geoY
 				self.faction=faction
+				self.composition
 				
 		def checkValidMove(self,newX,newY):
-				return notnewX,newY
+				return True
 				
-		def move(self,newX,newY):
-				pass
+		def Battle(other):
+				triggerBattle([self,other])
+				
+		def __str__(self):
+				return "%s@%f,%f"%(str(self.composition),self.geoX,self.geoY)
 
 class Army(MetaArmy):
 		def __init__(self,geoX,geoY,faction,composition):
@@ -221,10 +255,33 @@ class Army(MetaArmy):
 				faction.armies.append(self)#@upper
 				armies.append(self)#@global
 				
+		def destroy(self):
+				armies.remove(self)
+				self.faction.armies.remove(self)
+				
+		def move(self,newX,newY):
+				if sqrt((newX-self.geoX)**2 + (newY-self.geoY)**2)<100 and isOnLand(newX,newY):
+						self.geoX=newX
+						self.geoY=newY
+				else:
+						print("Error, move not valid")
+				
 class Navy(MetaArmy):
-		def __init__(self,geoC,geoY,faction):
+		def __init__(self,geoX,geoY,faction,composition):
 				self.geoX=geoX
 				self.geoY=geoY
+				self.composition=composition
 				navies.append(self)
 				faction.navies.append(self)#@upper
 				self.faction=faction#@global
+				
+		def destroy(self):
+				self.faction.navies.remove(self)
+				navies.remove(self)
+				
+		def move(self,newX,newY):
+				if sqrt((newX-self.geoX)**2 + (newY-self.geoY)**2)<100 and isOnWater(newX,newY):
+						self.geoX=newX
+						self.geoY=newY
+				else:
+						print("Error, move not valid")

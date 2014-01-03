@@ -26,6 +26,9 @@ FishMax=SeaRoute([],Carthage,Athens)
 GA=GraphAnalyser()
 
 Romans.addAlly(Carthaginians)
-Romans.recruitArmy(Carthaginians,{'':100})
+Romans.recruitArmy(Carthaginians,{'Foot Soldiers':100})
+Romans.recruitArmy(Carthaginians,{'Elephants':100})
+Romans.recruitNavy(Carthaginians,{'Brigs':5})
+triggerBattle(armies+navies)
 import pdb
 pdb.set_trace()
