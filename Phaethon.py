@@ -70,7 +70,7 @@ class Faction:
 				if enemy in self.allies:
 						self.allies.remove(enemy)
 				elif enemy in self.neutral:
-						self.neutral.pop(enemy)
+						self.neutral.remove(enemy)
 				self.enemies.append(enemy)
 				enemy.addEnemy(self)
 
@@ -152,19 +152,20 @@ class City:
 				self.manPower=manPower
 				self.money=money
 				self.destroyed=False
-				self.beseiged=False
-				self.seigeFaction=None
+				self.besieged=False
+				self.siegeFaction=None
 				self.navyAssist=False
 				self.moneyCoefficient=1.0
 				self.manPowerCoefficient=1.0
+				self.capital=capital
 				if capital:
 						alleigance.capital=self
 				cities.append(self)#@global
 
 		def besiege(self,army):
 				self.besieged=True
-				self.seigeFaction=army.faction
-				self.seigeArmy=army
+				self.siegeFaction=army.faction
+				self.siegeArmy=army
 				self.moneyCoefficient*=0.33
 				self.manPowerCoefficient*=0.33
 
@@ -176,25 +177,34 @@ class City:
 						self.moneyCoefficient-=0.166
 						self.manPowerCoefficient-=0.166
 				if self.moneyCoefficient<=0.0 or self.manPowerCoefficient<=0.0:
-						self.destroy()
+						print("%s is defeated"%self.name)
 
 		def desiege(self):
 				self.besieged=False
 				self.moneyCoefficient=1.0
 				self.manPowerCoefficient=1.0
-				self.seigeFaction=None
-				self.seigeArmy=None
+				self.siegeFaction=None
+				self.siegeArmy=None
 
 		def destroy(self):
 				print("%s is Destroyed"%self.name)
 				self.destroyed=True
 				self.money=0
 				self.manPower=0
-				self.seigeFaction=None
-				self.seigeArmy=None
+				self.siegeFaction=None
+				self.siegeArmy=None
 
 		def sack(self):
 				pass
+				
+		def defect(self,other):
+				if self.capital:
+						self.alleigance.capital=None
+				self.alleigance.cities.remove(self)
+				self.alleigance=other
+				other.cities.append(self)
+				if self.besieged:
+						self.desiege()
 
 class Route:
 		def __init__(self,name,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
