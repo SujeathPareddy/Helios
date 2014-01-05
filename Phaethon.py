@@ -1,4 +1,5 @@
 import networkx as nx
+from math import sqrt
 
 superFactions=[]
 factions=[]
@@ -18,24 +19,20 @@ def isOnWater(newX,newY):
 def triggerBattle(List):
 		k=0
 		flag=False
-		for i in List:
-				print(k,end='=')
-				print(i.faction,end='')
-				print(i)
-				k+=1
+		for k,i in enumerate(List):
+				print("%d=%s:%s"%(k,i.faction,str(i)))
 		while True:
-				winner=[int(i) for i in input("Enter the winner(s)").split()]#Add a try catch block here!!!
-				for i in winner:
-						if not 0<=i<=k:
-								print("Invalid")
-								flag=True
-								break
-				if flag:
+				try:
+						winner=[int(i) for i in str(input("Enter the winner(s)")).split()]
+						print(winner)
+				except Exception as ex:
+						print(ex)
 						continue
-				for i in range(k):
-						if i in winner:
-								continue
-						List[i].destroy()
+				if not all(0<=i<=k for i in winner):
+						continue 
+				temp=[List[i] for i in range(k+1) if i not in winner]
+				for i in temp:
+						i.destroy()
 				break
 						
 		
@@ -48,7 +45,6 @@ class Faction:
 				self.neutral=[]
 				self.allies=[]
 				self.enemies=[]
-				self.alleigance=alleigance
 				factions.append(self)#@global
 				self.armies=[]
 				self.navies=[]
@@ -119,6 +115,9 @@ class Faction:
 		
 		def recruitNavy(self,target,troops):
 				target.recruitFrom(self,troops,False)
+				
+		def __str__(self):
+				return self.name
 
 class SuperFaction(Faction):
 		def __init__(self,name):
@@ -126,7 +125,6 @@ class SuperFaction(Faction):
 				self.neutral=[]
 				self.allies=[]
 				self.enemies=[]
-				self.alleigance=self
 				self.capital=None
 				self.cities=[]
 				self.armies=[]
@@ -148,37 +146,60 @@ class City:
 				self.name=name
 				self.province=province
 				province.cities.append(self)#@upper
-				self.alleigance=alleigance#Use self.alleigance.alleigance to get superFaction
+				self.alleigance=alleigance
 				self.geoX=geoX
 				self.geoY=geoY
 				self.manPower=manPower
 				self.money=money
 				self.destroyed=False
 				self.beseiged=False
+				self.seigeFaction=None
+				self.navyAssist=False
+				self.moneyCoefficient=1.0
+				self.manPowerCoefficient=1.0
 				if capital:
 						alleigance.capital=self
 				cities.append(self)#@global
 
-		def besiege(self):
+		def besiege(self,army):
 				self.besieged=True
-				self.money*=0.33
-				self.manPower*=0.33
-				self.supply*=0.33
+				self.seigeFaction=army.faction
+				self.seigeArmy=army
+				self.moneyCoefficient*=0.33
+				self.manPowerCoefficient*=0.33
+
+		def siegeIter(self):
+				if self.navyAssist:
+						self.moneyCoefficient-=0.105
+						self.manPowerCoeffcient-=0.105
+				else:
+						self.moneyCoefficient-=0.166
+						self.manPowerCoefficient-=0.166
+				if self.moneyCoefficient<=0.0 or self.manPowerCoefficient<=0.0:
+						self.destroy()
 
 		def desiege(self):
 				self.besieged=False
-				pass
+				self.moneyCoefficient=1.0
+				self.manPowerCoefficient=1.0
+				self.seigeFaction=None
+				self.seigeArmy=None
 
 		def destroy(self):
+				print("%s is Destroyed"%self.name)
 				self.destroyed=True
 				self.money=0
 				self.manPower=0
+				self.seigeFaction=None
+				self.seigeArmy=None
 
 		def sack(self):
 				pass
 
 class Route:
-		def __init__(self,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
+		def __init__(self,name,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
+				self.name=name
+				self.points=points
 				self.A=A
 				self.B=B
 				self.provinces=provinces
@@ -191,19 +212,25 @@ class Route:
 						return False
 		
 		def isBlockedFor(self,superFaction):
-				for province in self.provinces:
-						if province.occupying.alleigance in superFaction.enemies:
-								return False
-				return True
+				if self.A.seigeFaction in superFaction.enemies or self.B.seigeFaction in superFaction.enemies:
+						return True
+				if any(province.occupying in superFaction.enemies for province in self.provinces):
+						return True
+				return False
+				
+		def __str__(self):
+				return self.name
 
 class SeaRoute:
-		def __init__(self,points,A,B):
+		def __init__(self,name,points,A,B):
+				self.name=name
+				self.points=points
 				self.A=A
 				self.B=B
 				self.navies={i:[] for i in superFactions}
 				seaRoutes.append(self)
 
-		def addNavy(navy):
+		def addNavy(self,navy):
 				if navy not in self.navies[navy.faction]:
 						self.navies[navy.faction].append(navy)
 				navyPresence=0
@@ -211,15 +238,17 @@ class SeaRoute:
 						if len(self.navies[side])>0:
 								armyPresence+=1
 				if navyPresence>1:
-						triggerNavalBattle(self.navies)
+						triggerBattle(self.navies)
 		
 		def isBlockedFor(self,superFaction):
 				if superFaction in self.A.alleigance.enemies or superFaction in self.B.alleigance.enemies:
 						return True
-				for side in superFaction.enemies:
-						if len(self.navies[side])>0:
-								return True
+				if any(len(self.navies[side])>0 for side in superFaction.enemies):
+						return True
 				return False
+				
+		def __str__(self):
+				return self.name
 
 class GraphAnalyser:
 		def __init__(self):
@@ -240,7 +269,7 @@ class MetaArmy:
 		def checkValidMove(self,newX,newY):
 				return True
 				
-		def Battle(other):
+		def Battle(self,other):
 				triggerBattle([self,other])
 				
 		def __str__(self):
@@ -265,7 +294,10 @@ class Army(MetaArmy):
 						self.geoY=newY
 				else:
 						print("Error, move not valid")
-				
+						
+		def laySiege(self,city):
+				city.besiege(self)
+							
 class Navy(MetaArmy):
 		def __init__(self,geoX,geoY,faction,composition):
 				self.geoX=geoX
