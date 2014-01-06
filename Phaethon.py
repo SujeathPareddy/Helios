@@ -38,7 +38,7 @@ def triggerBattle(List):
 						
 		
 class Faction:
-		def __init__(self,name,alleigance):
+		def __init__(self,name,money=0):
 				self.name=name
 				self.capital=None
 				self.province=None
@@ -49,6 +49,7 @@ class Faction:
 				factions.append(self)#@global
 				self.armies=[]
 				self.navies=[]
+				self.money=money
 
 		def getManPower(self):
 				return sum(map(lambda city:city.manPower,self.cities))
@@ -56,7 +57,7 @@ class Faction:
 		def getTribute(self):
 				pass
 				
-		def destroy(self):
+		def destroySelf(self):
 				pass
 
 		def changeCapital(self,capital):
@@ -120,11 +121,26 @@ class Faction:
 		def __str__(self):
 				return self.name
 				
-		def sack(self,city):
+		def sackCity(self,city):
 				self.money+=city.sack()
+				
+		def destroyCity(self,city):
+				self.money+=city.money
+				city.destroy()
+		
+		def captureCity(self,city):
+				city.money*=0.4
+				city.manPower*=0.4
+				city.defect(self)
+				
+		def evalStatus(self):
+				print(self.name)
+				if len(self.cities)==0:
+						print("%s has lost"%self.name)
+						self.destroySelf()
 
 class SuperFaction(Faction):
-		def __init__(self,name):
+		def __init__(self,name,money=0):
 				self.name=name
 				self.neutral=[]
 				self.allies=[]
@@ -134,6 +150,7 @@ class SuperFaction(Faction):
 				self.armies=[]
 				self.navies=[]
 				self.province=None
+				self.money=money
 				superFactions.append(self)#@global
 
 class Province:
@@ -199,11 +216,13 @@ class City:
 		def destroy(self):
 				print("%s is Destroyed"%self.name)
 				self.destroyed=True
+				self.besieged=True
 				self.money=0
 				self.manPower=0
 				self.siegeFaction=None
 				self.siegeArmy=None
 				self.navyAssist=False
+				self.alleigance.evalStatus()
 
 		def sack(self):
 				print("%s is Sacked"%self.name)
@@ -214,13 +233,15 @@ class City:
 				if self.capital:
 						self.alleigance.capital=None
 				self.alleigance.cities.remove(self)
+				self.alleigance.evalStatus()
 				self.alleigance=other
 				other.cities.append(self)
 				if self.besieged:
 						self.desiege()
 						
-		def addToGarrison(army):
-				assert army.faction is self.alleigance
+		def addToGarrison(number,cost):
+				self.garrison+=number
+				self.money-=cost
 
 class Route:
 		def __init__(self,name,points,A,B,provinces):#Provinces is a list of provinces that the route passes through

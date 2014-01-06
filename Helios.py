@@ -8,7 +8,7 @@ Romans.addEnemy(Hannibal)
 Romans.addEnemy(Carthaginians)
 Hannibal.addEnemy(Carthaginians)
 
-Greeks=Faction("Greeks",Romans)
+Greeks=Faction("Greeks")
 
 Greeks.addNeutral(Romans)
 Greeks.addAlly(Hannibal)
@@ -37,5 +37,4 @@ Carthaginians.recruitArmy(Romans,{'Cavalry':50})
 triggerBattle(armies+navies)
 Carthaginians.armies[0].laySiege(Athens)
 
-import pdb
-pdb.set_trace()
+Carthaginians.captureCity(Athens)
