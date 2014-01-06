@@ -37,6 +37,5 @@ Carthaginians.recruitArmy(Romans,{'Cavalry':50})
 triggerBattle(armies+navies)
 Carthaginians.armies[0].laySiege(Athens)
 
-
 import pdb
 pdb.set_trace()

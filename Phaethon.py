@@ -1,5 +1,6 @@
 import networkx as nx
 from math import sqrt
+from random import gauss
 
 superFactions=[]
 factions=[]
@@ -23,7 +24,7 @@ def triggerBattle(List):
 				print("%d=%s:%s"%(k,i.faction,str(i)))
 		while True:
 				try:
-						winner=[int(i) for i in str(input("Enter the winner(s)")).split()]
+						winner=[int(i) for i in input("Enter the winner(s)").split()]
 						print(winner)
 				except Exception as ex:
 						print(ex)
@@ -118,6 +119,9 @@ class Faction:
 				
 		def __str__(self):
 				return self.name
+				
+		def sack(self,city):
+				self.money+=city.sack()
 
 class SuperFaction(Faction):
 		def __init__(self,name):
@@ -142,7 +146,7 @@ class Province:
 				provinces.append(self)#@global
 
 class City:
-		def __init__(self,name,province,alleigance,geoX=0,geoY=0,manPower=0,money=0,capital=False):
+		def __init__(self,name,province,alleigance,geoX=0,geoY=0,manPower=0,money=0,capital=False,garrison=None,garrisonCost=0):
 				self.name=name
 				self.province=province
 				province.cities.append(self)#@upper
@@ -160,6 +164,11 @@ class City:
 				self.capital=capital
 				if capital:
 						alleigance.capital=self
+				if garrison is None:
+						self.garrison=int(gauss(self.manPower/10,self.manPower/100))
+				else:
+						self.garrison=garrison
+				self.money-=garrisonCost
 				cities.append(self)#@global
 
 		def besiege(self,army):
@@ -185,6 +194,7 @@ class City:
 				self.manPowerCoefficient=1.0
 				self.siegeFaction=None
 				self.siegeArmy=None
+				self.navyAssist=False
 
 		def destroy(self):
 				print("%s is Destroyed"%self.name)
@@ -193,9 +203,12 @@ class City:
 				self.manPower=0
 				self.siegeFaction=None
 				self.siegeArmy=None
+				self.navyAssist=False
 
 		def sack(self):
-				pass
+				print("%s is Sacked"%self.name)
+				self.money*=0.4
+				return self.money*0.6/0.4
 				
 		def defect(self,other):
 				if self.capital:
@@ -205,6 +218,9 @@ class City:
 				other.cities.append(self)
 				if self.besieged:
 						self.desiege()
+						
+		def addToGarrison(army):
+				assert army.faction is self.alleigance
 
 class Route:
 		def __init__(self,name,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
