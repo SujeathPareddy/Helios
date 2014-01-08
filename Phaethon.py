@@ -1,6 +1,7 @@
 import networkx as nx
 from math import sqrt
 from random import gauss
+import itertools
 
 superFactions=[]
 factions=[]
@@ -161,6 +162,9 @@ class Province:
 				occupying.cities=self.cities
 				occupying.province=self#@upper
 				provinces.append(self)#@global
+				
+		def __str__(self):
+				return self.name
 
 class City:
 		def __init__(self,name,province,alleigance,geoX=0,geoY=0,manPower=0,money=0,capital=False,garrison=None,garrisonCost=0):
@@ -232,6 +236,7 @@ class City:
 		def defect(self,other):
 				if self.capital:
 						self.alleigance.capital=None
+				self.capital=False
 				self.alleigance.cities.remove(self)
 				self.alleigance.evalStatus()
 				self.alleigance=other
@@ -242,6 +247,9 @@ class City:
 		def addToGarrison(number,cost):
 				self.garrison+=number
 				self.money-=cost
+				
+		def __str__(self):
+				return self.name
 
 class Route:
 		def __init__(self,name,points,A,B,provinces):#Provinces is a list of provinces that the route passes through
@@ -274,7 +282,7 @@ class SeaRoute:
 				self.points=points
 				self.A=A
 				self.B=B
-				self.navies={i:[] for i in superFactions}
+				self.navies={i:[] for i in itertools.chain(superFactions,factions)}
 				seaRoutes.append(self)
 
 		def addNavy(self,navy):
@@ -327,6 +335,8 @@ class Army(MetaArmy):
 				self.geoX=geoX
 				self.geoY=geoY
 				self.faction=faction
+				self.ambush=False
+				self.sieging=False
 				self.composition=composition
 				faction.armies.append(self)#@upper
 				armies.append(self)#@global
@@ -344,6 +354,17 @@ class Army(MetaArmy):
 						
 		def laySiege(self,city):
 				city.besiege(self)
+				self.siegeing=True
+		
+		def removeSiege(self,city):
+				city.desiege()
+				self.sieging=False
+				
+		def layAmbush(self):
+				self.ambush=True
+				
+		def removeAmbush(self):
+				self.ambush=False
 							
 class Navy(MetaArmy):
 		def __init__(self,geoX,geoY,faction,composition):
